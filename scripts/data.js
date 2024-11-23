@@ -32,7 +32,7 @@ const standardTutors = [
     week: "火・金",
     time: "2時間",
     subject: "社会",
-    content: "中堅レベルの社会科を担当します。偏差値55を目指して頑張りましょう",
+    content: "標準レベルの社会科を担当します。偏差値55を目指して頑張りましょう",
     image: "/images/icon_business_man02.png"
   },
   {
@@ -40,7 +40,7 @@ const standardTutors = [
     week: "月・水・土・日",
     time: "2時間",
     subject: "社会",
-    content: "中堅レベルの社会科を担当します。偏差値55を目指して頑張りましょう",
+    content: "標準レベルの社会科を担当します。偏差値55を目指して頑張りましょう",
     image: "/images/icon_business_man02.png"
   },
 ];

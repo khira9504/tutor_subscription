@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .bg-special {
+    @apply text-white bg-gradient-to-br from-pink-500 to-orange-400;
+  }
+  .bg-standard {
+    @apply text-white bg-gradient-to-r from-cyan-500 to-blue-500;
+  }
+}
+
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
