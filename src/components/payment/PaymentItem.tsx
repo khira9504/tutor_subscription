@@ -1,11 +1,11 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
 import Stripe from 'stripe';
-import { getLevelFromMetadata } from '@/feature/stripe/stripe';
-import { Button } from '../ui/button';
+import { Suspense } from 'react';
+import { Skeleton } from '../ui/skeleton';
+import PaymentButton from './PaymentButton';
 
 export default function PaymentItem({ price }: { price: Stripe.Price }) {
   const product = price.product as Stripe.Product;
-  const buttonVariant = getLevelFromMetadata(product.metadata) === "Special" ? "special" : "standard";
 
   return (
     <Card className="bg-white max-w-xs flex flex-col items-center h-[500px] hover:scale-[1.05] transition duration-300">
@@ -19,9 +19,9 @@ export default function PaymentItem({ price }: { price: Stripe.Price }) {
         </div>
       </CardContent>
       <CardFooter className="mt-auto w-full">
-        <Button className="w-full cursor-pointer font-bold text-base" variant={buttonVariant} asChild>
-          <a>コースに登録する</a>
-        </Button>
+        <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+          <PaymentButton price={ price } />
+        </Suspense>
       </CardFooter>
     </Card>
   );

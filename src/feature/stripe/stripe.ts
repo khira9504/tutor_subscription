@@ -62,3 +62,38 @@ export const getLevelFromMetadata = (metadata: Stripe.Metadata): SubscriptionLev
     };
   };
 };
+
+export const getSubscriptionPaymentUrl = async({ userId, priceId }: { userId: string; priceId: string }) => {
+  try {
+    const user = await getUserById({ userId });
+    if(!user) {
+      throw new Error(`ユーザーが存在しません: ${userId}`);
+    };
+
+    const customerId = user.customerId;
+    if (!customerId) {
+      throw new Error(`カスタマーIDが存在しません: ${userId}`);
+    };
+
+    const session = await stripe.checkout.sessions.create({
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment`,
+      payment_method_types: ["card"],
+      mode: "subscription",
+      customer: customerId,
+      line_items: [{ price: priceId, quantity: 1 }],
+      billing_address_collection: "auto",
+      metadata: {
+        userId,
+      },
+      subscription_data: {
+        metadata: {
+          userId,
+        },
+      },
+    });
+    return session.url;
+  } catch(err) {
+    throw err;
+  };
+};
