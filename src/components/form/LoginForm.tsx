@@ -14,8 +14,8 @@ type credentialsType = {
 
 export default function LoginForm() {
   const [credentials, setCredentials] = useState<credentialsType>({
-    email: "admin@example.com",
-    password: "admin"
+    email: "",
+    password: ""
   });
   const [isLoading, setIsLoading] = useState(false);
 

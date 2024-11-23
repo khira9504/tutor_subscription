@@ -4,7 +4,7 @@ import LoginForm from "@/components/form/LoginForm";
 
 export default async function page() {
   const session = await getAuthSession();
-  if(!session) {
+  if(session?.user) {
     redirect("/");
   };
 

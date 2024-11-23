@@ -1,9 +1,8 @@
-import { DefaultSession, getServerSession, NextAuthOptions } from "next-auth";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import { DefaultSession, NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcrypt";
-import { redirect } from "next/navigation";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -11,13 +10,13 @@ declare module "next-auth" {
       id: string;
     } & DefaultSession["user"];
   }
-}
+};
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
   }
-}
+};
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -29,27 +28,27 @@ export const authOptions: NextAuthOptions = {
         password: { label: "password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if(!credentials?.email || !credentials?.password) {
           return null;
-        }
+        };
 
-        const user = await prisma.user.findUnique({
+        const user = await prisma?.user.findUnique({
           where: {
             email: credentials.email,
           },
         });
-
-        if (!user) {
+        if(!user) {
           return null;
-        }
+        };
 
         const passwordMatch = await bcrypt.compare(
           credentials.password,
           user.password
         );
-        if (passwordMatch) {
+        if(passwordMatch) {
           return user;
-        }
+        };
+
         return null;
       },
     }),
@@ -60,16 +59,15 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
+      if(user) {
         token.id = user.id;
-      }
-
+      };
       return token;
     },
     async session({ session, token }) {
-      if (token) {
+      if(token) {
         session.user.id = token.id;
-      }
+      };
       return session;
     },
   },
@@ -77,9 +75,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
 };
-
-console.log("ok");
-
 
 export const getAuthSession = async () => {
   return getServerSession(authOptions);
