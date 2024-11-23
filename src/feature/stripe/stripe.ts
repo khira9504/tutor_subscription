@@ -40,7 +40,7 @@ export const createCustomerById = async({ userId }: { userId: string }) => {
 export const getStripePrices = async() => {
   try {
     const prices = await stripe.prices.list({
-      lookup_keys: ["premium", "standard"],
+      lookup_keys: ["special", "standard"],
       expand: ["data.product"],
     });
     return prices.data;
@@ -49,16 +49,16 @@ export const getStripePrices = async() => {
   };
 };
 
-export const getLevelFromMetadata = ({ metadata }: Stripe.Metadata): SubscriptionLevelType => {
-  switch(metadata.level) {
-    case "Premium": {
+export const getLevelFromMetadata = (metadata: Stripe.Metadata): SubscriptionLevelType => {
+  switch (metadata.level) {
+    case "Special": {
       return SubscriptionLevelType.Special;
     };
     case "Standard": {
       return SubscriptionLevelType.Standard;
     };
     default: {
-      throw new Error("Metadata.level が存在しません。metadata:", metadata);
+      throw new Error("メタデータが存在しません:", metadata);
     };
   };
 };
