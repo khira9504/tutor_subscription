@@ -23,12 +23,10 @@ export default async function TutorList() {
           <Link href={`/tutors/${tutor.id}`} className="border-2 rounded p-4 flex space-x-4 cursor-pointer hover:scale-[1.01] transition duration-300 shadow-md hover:shadow-lg">
             <div className="relative w-40 h-40 border-2 flex-shrink-0 z-0">
               {tutor.accessLevel === TutorAccessLevelType.Special && (
-                <div className="absolute bg-special text-xs px-1 z-50">SPECIAL</div>
+                <div className="absolute bg-special text-xs px-1 z-50">上級コース</div>
               )}
               {tutor.accessLevel === TutorAccessLevelType.Standard && (
-                <div className="absolute bg-standard text-xs px-1 z-50">
-                  STANDARD
-                </div>
+                <div className="absolute bg-standard text-xs px-1 z-50">標準コース</div>
               )}
               <Image className="object-cover" src={tutor.image || "/images/no-image.jpeg"} fill sizes="160px" alt={"tutor image"} />
             </div>
