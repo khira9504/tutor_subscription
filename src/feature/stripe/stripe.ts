@@ -66,14 +66,10 @@ export const getLevelFromMetadata = (metadata: Stripe.Metadata): SubscriptionLev
 export const getSubscriptionPaymentUrl = async({ userId, priceId }: { userId: string; priceId: string }) => {
   try {
     const user = await getUserById({ userId });
-    if(!user) {
-      throw new Error(`ユーザーが存在しません: ${userId}`);
-    };
+    if(!user) throw new Error(`ユーザーが存在しません: ${userId}`);
 
     const customerId = user.customerId;
-    if (!customerId) {
-      throw new Error(`カスタマーIDが存在しません: ${userId}`);
-    };
+    if (!customerId) throw new Error(`カスタマーIDが存在しません: ${userId}`);
 
     const session = await stripe.checkout.sessions.create({
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success`,
@@ -93,6 +89,19 @@ export const getSubscriptionPaymentUrl = async({ userId, priceId }: { userId: st
       },
     });
     return session.url;
+  } catch(err) {
+    throw err;
+  };
+};
+
+export const getBillingPortalURL = async({ customerId, returnPath }: { customerId: string; returnPath: string; }) => {
+  const returnUrl = new URL(returnPath, process.env.NEXT_PUBLIC_APP_URL as string);
+  try {
+    const billingPortal = await stripe.billingPortal.sessions.create({
+      customer: customerId,
+      return_url: returnUrl.toString(),
+    });
+    return billingPortal.url;
   } catch(err) {
     throw err;
   };

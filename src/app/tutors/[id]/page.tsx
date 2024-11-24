@@ -21,9 +21,7 @@ export const metadata: Metadata = {
 export default async function page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const tutor = await getTutorListById(id);
-  if(!tutor) {
-    notFound();
-  };
+  if(!tutor) notFound();
 
   return (
     <main className="max-w-screen-md mx-auto pb-10">

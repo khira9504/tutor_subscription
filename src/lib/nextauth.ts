@@ -28,26 +28,20 @@ export const authOptions: NextAuthOptions = {
         password: { label: "password", type: "password" },
       },
       async authorize(credentials) {
-        if(!credentials?.email || !credentials?.password) {
-          return null;
-        };
+        if(!credentials?.email || !credentials?.password) return null;
 
         const user = await prisma?.user.findUnique({
           where: {
             email: credentials.email,
           },
         });
-        if(!user) {
-          return null;
-        };
+        if(!user) return null;
 
         const passwordMatch = await bcrypt.compare(
           credentials.password,
           user.password
         );
-        if(passwordMatch) {
-          return user;
-        };
+        if(passwordMatch) return user;
 
         return null;
       },

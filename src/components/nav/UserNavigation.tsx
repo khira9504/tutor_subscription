@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Avatar } from "../ui/avatar";
 import Image from "next/image";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 type UserNavigationProps = {
   user: Pick<User, "name" | "image" | "email">
@@ -30,6 +31,12 @@ export default async function UserNavigation({ user }: UserNavigationProps) {
             <div className="my-2 text-base">{user.name || ""}</div>
             <div className="text-sm">{user.email || ""}</div>
           </div>
+          <Link href="/billing">
+            <DropdownMenuItem className="cursor-pointer">
+              プラン・請求
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuSeparator />
           <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer">
             <button className="w-full text-left" onClick={async () => handleClick()}>ログアウト</button>
