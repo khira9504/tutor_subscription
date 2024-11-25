@@ -1,7 +1,7 @@
 import { stripe } from "@/lib/stripe";
 import { getUserById } from "../prisma/user";
 import Stripe from "stripe";
-import { SubscriptionLevelType } from "@prisma/client";
+import { Subscription, SubscriptionLevelType } from "@prisma/client";
 
 export const createCustomerById = async({ userId }: { userId: string }) => {
   try {
@@ -102,6 +102,25 @@ export const getBillingPortalURL = async({ customerId, returnPath }: { customerI
       return_url: returnUrl.toString(),
     });
     return billingPortal.url;
+  } catch(err) {
+    throw err;
+  };
+};
+
+export const isValidSubscription = ({ subscription }: { subscription: Subscription }) => {
+  const isValidStatus = subscription.status === "active" || "trialing" || "past_due";
+
+  const expire = new Date(subscription.currentPeriodEnd);
+  expire.setHours(23, 59, 59, 999);
+  const isValidExpiry = Date.now() <= expire.getTime();
+
+  return isValidStatus && isValidExpiry;
+};
+
+export const getSubscriptionByUserId = async({ userId }: { userId: string }) => {
+  try {
+    const subscription = await prisma?.subscription.findUnique({ where: { userId } });
+    return subscription;
   } catch(err) {
     throw err;
   };
