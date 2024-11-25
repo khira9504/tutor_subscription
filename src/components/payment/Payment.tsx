@@ -9,7 +9,7 @@ export default async function Payment() {
   if(!session) redirect("/login");
 
   const subscription = await getSubscriptionByUserId({ userId: session.user.id });
-  const isActive = subscription === null ? false : isValidSubscription({ subscription });
+  const isActive = subscription == null ? false : isValidSubscription({ subscription });
 
   return (
     <div className="w-full flex justify-center space-x-4">
