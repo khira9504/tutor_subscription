@@ -1,17 +1,36 @@
 import { getTutorListById } from "@/feature/prisma/getTutorListById";
-import { notFound } from "next/navigation";
-import { TutorAccessLevelType } from "@prisma/client";
+import { notFound, redirect } from "next/navigation";
+import { SubscriptionLevelType, Tutor, TutorAccessLevelType } from "@prisma/client";
 import Image from "next/image";
 import type { Metadata } from "next";
+import { getAuthSession } from "@/lib/nextauth";
+import { getSubscriptionByUserId, isValidSubscription } from "@/feature/stripe/stripe";
 
 export const metadata: Metadata = {
   title: "講師紹介 | ジガクル | オンライン家庭教師のサブスク",
+};
+
+const canUserAccessPage = async({ tutor }: { tutor: Tutor }) => {
+  if(tutor.accessLevel === TutorAccessLevelType.Free) return;
+  const session = await getAuthSession();
+  if(!session) redirect("/login");
+
+  const subscription = await getSubscriptionByUserId({ userId: session.user.id });
+  if(subscription !== null && subscription?.planLevel === SubscriptionLevelType?.Special && isValidSubscription({ subscription })) {
+    return;
+  } else if (subscription !== null && subscription?.planLevel === SubscriptionLevelType?.Standard && isValidSubscription({ subscription })) {
+    if (tutor.accessLevel === TutorAccessLevelType.Standard) {
+      return;
+    };
+  };
+  redirect("/payment");
 };
 
 export default async function page({ params }: { params: { id: string } }) {
   const { id } = await params;
   const tutor = await getTutorListById(id);
   if(!tutor) notFound();
+  await canUserAccessPage({ tutor });
 
   return (
     <main className="max-w-screen-md mx-auto pb-10">

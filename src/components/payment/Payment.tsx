@@ -1,16 +1,23 @@
-import { getStripePrices } from "@/feature/stripe/stripe";
-import PaymentItem from "./PaymentItem";
+import { getAuthSession } from "@/lib/nextauth";
+import PaymentList from "./PaymentList";
+import { redirect } from "next/navigation";
+import { getSubscriptionByUserId, isValidSubscription } from "@/feature/stripe/stripe";
+import CourseChangeForm from "./CourseChangeForm";
 
 export default async function Payment() {
-  const prices = await getStripePrices();
+  const session = await getAuthSession();
+  if(!session) redirect("/login");
+
+  const subscription = await getSubscriptionByUserId({ userId: session.user.id });
+  const isActive = subscription === null ? false : isValidSubscription({ subscription });
 
   return (
     <div className="w-full flex justify-center space-x-4">
-      {prices.map((price, idx) => (
-        <div key={`price-${idx}`}>
-          <PaymentItem price={price} />
-        </div>
-      ))}
+      {isActive ? (
+        <CourseChangeForm subscription={ subscription! } />
+      ) : (
+        <PaymentList />
+      )}
     </div>
   );
 };
