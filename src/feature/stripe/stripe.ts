@@ -16,6 +16,7 @@ export const createCustomerById = async({ userId }: { userId: string }) => {
     const customer = await stripe.customers.create({
       email: user.email,
       name: user.name,
+      test_clock: process.env.NODE_ENV === "production" ? undefined : process.env.STRIPE_TEST_CLOCK_ID,
       preferred_locales: ["ja"],
       metadata: {
         userId,
@@ -83,6 +84,7 @@ export const getSubscriptionPaymentUrl = async({ userId, priceId }: { userId: st
         userId,
       },
       subscription_data: {
+        trial_period_days: 3,
         metadata: {
           userId,
         },
