@@ -4,21 +4,11 @@ import { TutorAccessLevelType } from "@prisma/client";
 import Image from "next/image";
 import type { Metadata } from "next";
 
-// export async function generateMetaData({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-//   const { id } = await params;
-//   const tutor = await getTutorListById(id);
-//   return {
-//     title: `aa${tutor?.title} | ジガクル | オンライン家庭教師のサブスク`,
-//     description: `${tutor?.content}--ジガクルは月額定額の家庭教師サブスクです。お好きなプランからレベルに合わせたオンライン学習をサポートします。`,
-//   };
-// };
-
 export const metadata: Metadata = {
   title: "講師紹介 | ジガクル | オンライン家庭教師のサブスク",
-  description: "ジガクルは月額定額の家庭教師サブスクです。お好きなプランからレベルに合わせたオンライン学習をサポートします。",
 };
 
-export default async function page({ params }: { params: Promise<{ id: string }> }) {
+export default async function page({ params }: { params: { id: string } }) {
   const { id } = await params;
   const tutor = await getTutorListById(id);
   if(!tutor) notFound();

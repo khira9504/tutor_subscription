@@ -36,8 +36,6 @@ export default async function UserNavigation({ user }: UserNavigationProps) {
               プラン・請求
             </DropdownMenuItem>
           </Link>
-          <DropdownMenuSeparator />
-          <DropdownMenuSeparator />
           <DropdownMenuItem className="cursor-pointer">
             <button className="w-full text-left" onClick={async () => handleClick()}>ログアウト</button>
           </DropdownMenuItem>
