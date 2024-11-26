@@ -19,7 +19,7 @@ export default async function PaymentButton({ price }: SubscriptionButtonProps) 
   const buttonVariant = getLevelFromMetadata(price.metadata) === "Special" ? "special" : "standard";
 
   return (
-    <Button className="w-full cursor-pointer font-bold text-base" variant={buttonVariant} asChild>
+    <Button className="w-full cursor-pointer font-bold text-base hover:opacity-[.6] transition-[.2s]" variant={buttonVariant} asChild>
       <a href={ paymentUrl }>コースに登録する</a>
     </Button>
   )

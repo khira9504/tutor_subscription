@@ -20,17 +20,17 @@ export default async function PurchaseForm({ tutorId }: { tutorId: string | unde
 
   return (
     <>
-      <Card className="bg-white w-[320px] flex flex-col items-center h-[500px] hover:scale-[1.05] transition duration-300">
+      <Card className="bg-white w-[320px] flex flex-col items-center h-[500px]">
         <CardHeader className="space-y-2 h-32 w-full">
           <CardTitle className="text-center w-full">1回コースの購入</CardTitle>
-          <CardDescription className="w-full">{`「${tutor?.title}」の記事を購入します`}</CardDescription>
+          <CardDescription className="w-full">{`${tutor?.title}さんのコースを一度切り購入できます`}</CardDescription>
         </CardHeader>
         <CardContent className="mt-12">
           <div className="text-xl font-bold text-gray-700">{`￥${tutorPrice.toLocaleString("en-US")}円`}</div>
         </CardContent>
         <CardFooter className="mt-auto w-full">
-          <Button className="w-full cursor-pointer font-bold text-base" variant={"default"} asChild>
-            <a href={paymentUrl}>記事を購入する</a>
+          <Button className="w-full cursor-pointer font-bold text-base hover:opacity-[.6]" variant={"default"} asChild>
+            <a href={paymentUrl}>購入する</a>
           </Button>
         </CardFooter>
       </Card>

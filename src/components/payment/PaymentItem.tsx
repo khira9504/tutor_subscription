@@ -8,7 +8,7 @@ export default function PaymentItem({ price }: { price: Stripe.Price }) {
   const product = price.product as Stripe.Product;
 
   return (
-    <Card className="bg-white max-w-xs flex flex-col items-center h-[500px] hover:scale-[1.05] transition duration-300">
+    <Card className="bg-white max-w-xs flex flex-col items-center h-[500px]">
       <CardHeader className="space-y-2 h-32">
         <CardTitle className="text-center">{product.name}</CardTitle>
         <CardDescription>{product.description}</CardDescription>
