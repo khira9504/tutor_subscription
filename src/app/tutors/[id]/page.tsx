@@ -1,10 +1,11 @@
-import { getTutorListById } from "@/feature/prisma/getTutorListById";
+import { getTutorById } from "@/feature/prisma/tutor";
 import { notFound, redirect } from "next/navigation";
 import { SubscriptionLevelType, Tutor, TutorAccessLevelType } from "@prisma/client";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getAuthSession } from "@/lib/nextauth";
 import { getSubscriptionByUserId, isValidSubscription } from "@/feature/stripe/stripe";
+import { getPurchase } from "@/feature/prisma/purchase";
 
 export const metadata: Metadata = {
   title: "講師紹介 | ジガクル | オンライン家庭教師のサブスク",
@@ -16,19 +17,22 @@ const canUserAccessPage = async({ tutor }: { tutor: Tutor }) => {
   if(!session) redirect("/login");
 
   const subscription = await getSubscriptionByUserId({ userId: session.user.id });
-  if(subscription !== null && subscription?.planLevel === SubscriptionLevelType?.Special && isValidSubscription({ subscription })) {
-    return;
-  } else if (subscription !== null && subscription?.planLevel === SubscriptionLevelType?.Standard && isValidSubscription({ subscription })) {
-    if (tutor.accessLevel === TutorAccessLevelType.Standard) {
+  if(subscription != null && isValidSubscription({ subscription })) {
+    if(subscription?.planLevel === SubscriptionLevelType?.Special) {
       return;
+    } else if (subscription?.planLevel === SubscriptionLevelType?.Standard) {
+      if (tutor.accessLevel === TutorAccessLevelType.Standard) return;
     };
   };
-  redirect("/payment");
+
+  const purchase = await getPurchase({ userId: session.user.id, tutorId: tutor.id });
+  if (purchase !== null) return;
+  redirect(`/payment?tutor_id=${tutor.id.toString()}`);
 };
 
 export default async function page({ params }: { params: { id: string } }) {
   const { id } = await params;
-  const tutor = await getTutorListById(id);
+  const tutor = await getTutorById(id);
   if(!tutor) notFound();
   await canUserAccessPage({ tutor });
 

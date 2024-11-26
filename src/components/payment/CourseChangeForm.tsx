@@ -13,7 +13,7 @@ export default async function CourseChangeForm({ subscription }: { subscription:
   const user = await getUserById({ userId: session.user.id });
   if (!user || !user.customerId) return null;
 
-  const url = await getBillingPortalURL({ customerId: user.customerId, returnPath: "/checkout"});
+  const url = await getBillingPortalURL({ customerId: user.customerId, returnPath: "/payment"});
   const planLevel = subscription.planLevel === SubscriptionLevelType.Special ? "上級コース" : "標準コース";
 
   return (

@@ -1,7 +1,8 @@
 import { stripe } from "@/lib/stripe";
 import { getUserById } from "../prisma/user";
 import Stripe from "stripe";
-import { Subscription, SubscriptionLevelType } from "@prisma/client";
+import { Subscription, SubscriptionLevelType, Tutor, TutorAccessLevelType } from "@prisma/client";
+import { SPECIAL_PRICE, STANDARD_PRICE } from "../price/price";
 
 export const createCustomerById = async({ userId }: { userId: string }) => {
   try {
@@ -126,4 +127,52 @@ export const getSubscriptionByUserId = async({ userId }: { userId: string }) => 
   } catch(err) {
     throw err;
   };
+};
+
+export const getPurchaseCheckoutURL = async ({ userId, tutor }: { userId: string; tutor: Tutor; }) => {
+  try {
+    const user = await getUserById({ userId });
+    if (user === null)  throw new Error("ユーザーが存在しません");
+    const customerId = user?.customerId;
+    if (customerId === null) throw new Error(`カスタマーIDが存在しません。userId: ${user?.id}`);
+    
+    const params = new URLSearchParams();
+    params.set("tutor_id", tutor.id);
+
+    const tutorPrice = tutor.accessLevel === TutorAccessLevelType.Special ? SPECIAL_PRICE : STANDARD_PRICE;
+
+    const checkoutSession = await stripe.checkout.sessions.create({
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/success?${params.toString()}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment`,
+      payment_method_types: ["card"],
+      mode: "payment",
+      customer: customerId,
+      billing_address_collection: "auto",
+      line_items: [
+        {
+          price_data: {
+            currency: "jpy",
+            product_data: {
+              name: `${tutor.title} の記事`,
+            },
+            unit_amount: tutorPrice,
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        userId,
+        tutorId: tutor.id,
+      },
+      payment_intent_data: {
+        metadata: {
+          userId,
+          tutorId: tutor.id,
+        },
+      },
+    });
+    return checkoutSession.url;
+  } catch (error) {
+    throw error;
+  }
 };

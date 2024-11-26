@@ -14,13 +14,13 @@ export default async function PaymentButton({ price }: SubscriptionButtonProps) 
     redirect("/login");
   };
 
-  const checkoutUrl = await getSubscriptionPaymentUrl({ userId: session.user.id, priceId: price.id}) || "/";
+  const paymentUrl = await getSubscriptionPaymentUrl({ userId: session.user.id, priceId: price.id}) || "/";
   
   const buttonVariant = getLevelFromMetadata(price.metadata) === "Special" ? "special" : "standard";
 
   return (
     <Button className="w-full cursor-pointer font-bold text-base" variant={buttonVariant} asChild>
-      <a href={ checkoutUrl }>コースに登録する</a>
+      <a href={ paymentUrl }>コースに登録する</a>
     </Button>
   )
 }

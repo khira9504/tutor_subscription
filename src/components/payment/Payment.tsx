@@ -3,8 +3,11 @@ import PaymentList from "./PaymentList";
 import { redirect } from "next/navigation";
 import { getSubscriptionByUserId, isValidSubscription } from "@/feature/stripe/stripe";
 import CourseChangeForm from "./CourseChangeForm";
+import { Suspense } from "react";
+import { SkeletonForm } from "./SkeletonForm";
+import PurchaseForm from "./PurchaseForm";
 
-export default async function Payment() {
+export default async function Payment({ tutorId }: { tutorId: string | undefined; }) {
   const session = await getAuthSession();
   if(!session) redirect("/login");
 
@@ -13,6 +16,9 @@ export default async function Payment() {
 
   return (
     <div className="w-full flex justify-center space-x-4">
+      <Suspense fallback={<SkeletonForm />}>
+        <PurchaseForm tutorId={ tutorId } />
+      </Suspense>
       {isActive ? (
         <CourseChangeForm subscription={ subscription! } />
       ) : (
