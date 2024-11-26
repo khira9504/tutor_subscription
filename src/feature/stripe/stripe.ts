@@ -81,6 +81,9 @@ export const getSubscriptionPaymentUrl = async({ userId, priceId }: { userId: st
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
       billing_address_collection: "auto",
+      shipping_address_collection: {
+        allowed_countries: ["JP"],
+      },
       metadata: {
         userId,
       },
@@ -175,4 +178,14 @@ export const getPurchaseCheckoutURL = async ({ userId, tutor }: { userId: string
   } catch (error) {
     throw error;
   }
+};
+
+export const getShippingByCustomerId = async({ customerId }: { customerId: string }) => {
+  try {
+    const res = await stripe.customers.retrieve(customerId) as Stripe.Customer;
+    if(res.deleted) throw new Error("no getting res");
+    return res;
+  } catch(err) {
+    throw err;
+  };
 };

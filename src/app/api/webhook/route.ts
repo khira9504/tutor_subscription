@@ -81,6 +81,27 @@ export async function POST(req: Request) {
         });
         break;
       };
+      case "checkout.session.completed": {
+        const session: Stripe.Checkout.Session = evt.data.object;
+        const shipping_details = session.shipping_details;
+
+        if(shipping_details !== null) {
+          await stripe.customers.update(session.customer as string, {
+            shipping: {
+              name: shipping_details.name!,
+              address: {
+                country: shipping_details.address?.country!,
+                postal_code: shipping_details.address?.postal_code!,
+                city: shipping_details.address?.city!,
+                state: shipping_details.address?.state!,
+                line1: shipping_details.address?.line1!,
+                line2: shipping_details.address?.line2!,
+              },
+            },
+          });
+        };
+      };
+      break;
     };
   } catch(err) {
     throw err;
