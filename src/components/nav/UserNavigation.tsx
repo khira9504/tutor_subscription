@@ -31,6 +31,11 @@ export default async function UserNavigation({ user }: UserNavigationProps) {
             <div className="my-2 text-base">{user.name || ""}</div>
             <div className="text-sm">{user.email || ""}</div>
           </div>
+          <Link className="block mb-[.5em]" href="/purchases">
+            <DropdownMenuItem className="cursor-pointer">
+              購入履歴
+            </DropdownMenuItem>
+          </Link>
           <Link className="block mb-[.5em]" href="/shipping">
             <DropdownMenuItem className="cursor-pointer">
               住所表示
