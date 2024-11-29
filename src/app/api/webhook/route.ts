@@ -1,3 +1,4 @@
+import { updatePurchase } from "@/feature/prisma/purchase";
 import { getLevelFromMetadata } from "@/feature/stripe/stripe";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
@@ -101,7 +102,15 @@ export async function POST(req: Request) {
           });
         };
       };
-      break;
+      case "payment_intent.succeeded": {
+        const intentData = evt.data.object as Stripe.PaymentIntent;
+        if (intentData.invoice) break;
+
+        const userId = intentData.metadata.userId;
+        const tutorId = intentData.metadata.articleId;
+        await updatePurchase({ userId, tutorId, intentData });
+        break;
+      };
     };
   } catch(err) {
     throw err;

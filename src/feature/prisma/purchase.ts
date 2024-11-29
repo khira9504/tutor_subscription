@@ -1,14 +1,14 @@
 import prisma from "@/lib/prisma";
 import Stripe from "stripe";
 
-export const createPurchase = async({ userId, tutorId, paymentIntent }: { userId: string; tutorId: string; paymentIntent: Stripe.PaymentIntent }) => {
+export const createPurchase = async({ userId, tutorId, intentData }: { userId: string; tutorId: string; intentData: Stripe.PaymentIntent }) => {
   try {
     await prisma.purchase.create({
       data: {
         userId,
         tutorId,
-        paymentIntentId: paymentIntent.id,
-        amount: paymentIntent.amount,
+        paymentIntentId: intentData.id,
+        amount: intentData.amount,
       },
     });
   } catch(err) {
@@ -16,15 +16,15 @@ export const createPurchase = async({ userId, tutorId, paymentIntent }: { userId
   };
 };
 
-export const updatePurchase = async ({ userId, tutorId, paymentIntent }: { userId: string; tutorId: string; paymentIntent: Stripe.PaymentIntent; }) => {
+export const updatePurchase = async ({ userId, tutorId, intentData }: { userId: string; tutorId: string; intentData: Stripe.PaymentIntent; }) => {
   try {
     await prisma.purchase.update({
       where: {
         userId_tutorId: { userId, tutorId },
       },
       data: {
-        paymentIntentId: paymentIntent.id,
-        amount: paymentIntent.amount,
+        paymentIntentId: intentData.id,
+        amount: intentData.amount,
       },
     });
   } catch (error) {
