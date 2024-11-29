@@ -24,7 +24,6 @@ export const updatePurchase = async ({ userId, tutorId, paymentIntent }: { userI
       },
       data: {
         paymentIntentId: paymentIntent.id,
-        paymentStatus: paymentIntent.status,
         amount: paymentIntent.amount,
       },
     });

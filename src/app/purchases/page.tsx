@@ -11,7 +11,7 @@ export default async function page() {
 
   const userId = session.user.id;
   const purchasesInfo = await getPurchaseInfo({ userId });
-  if(purchasesInfo.length == 0) return <p>購入履歴がありませんでした</p>
+  if(purchasesInfo.length == 0) return <p>購入履歴はありませんでした</p>;
 
   return (
     <main className="max-w-screen-md mx-auto">
