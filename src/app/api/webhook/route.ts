@@ -1,4 +1,4 @@
-import { updatePurchase } from "@/feature/prisma/purchase";
+import { createPurchase, updatePurchase } from "@/feature/prisma/purchase";
 import { getLevelFromMetadata } from "@/feature/stripe/stripe";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
@@ -19,6 +19,33 @@ export async function POST(req: Request) {
 
   try {
     switch(evt.type) {
+      case "checkout.session.completed": {
+        const session = evt.data.object;
+        if("subscription" in session && session.subscription) {
+          const shippingDetails = session.shipping_details;
+          if (shippingDetails !== null) {
+            await stripe.customers.update(session.customer as string, {
+              shipping: {
+                name: shippingDetails.name!,
+                address: {
+                  country: shippingDetails.address?.country!,
+                  postal_code: shippingDetails.address?.postal_code!,
+                  city: shippingDetails.address?.city!,
+                  state: shippingDetails.address?.state!,
+                  line1: shippingDetails.address?.line1!,
+                  line2: shippingDetails.address?.line2!,
+                },
+              },
+            });
+          };
+        } else if("payment_intent" in session && session.payment_intent) {
+          const intentData = await stripe.paymentIntents.retrieve(session.payment_intent as string);
+          const userId = intentData.metadata.userId;
+          const tutorId = intentData.metadata.articleId;
+          await createPurchase({ userId, tutorId, intentData });
+        };
+        break;
+      };
       case "invoice.payment_succeeded": {
         const invoice: Stripe.Invoice = evt.data.object;
         const userId = invoice.subscription_details?.metadata?.userId;
@@ -82,30 +109,11 @@ export async function POST(req: Request) {
         });
         break;
       };
-      case "checkout.session.completed": {
-        const session: Stripe.Checkout.Session = evt.data.object;
-        const shipping_details = session.shipping_details;
-
-        if(shipping_details !== null) {
-          await stripe.customers.update(session.customer as string, {
-            shipping: {
-              name: shipping_details.name!,
-              address: {
-                country: shipping_details.address?.country!,
-                postal_code: shipping_details.address?.postal_code!,
-                city: shipping_details.address?.city!,
-                state: shipping_details.address?.state!,
-                line1: shipping_details.address?.line1!,
-                line2: shipping_details.address?.line2!,
-              },
-            },
-          });
-        };
-      };
-      case "payment_intent.succeeded": {
+      case "payment_intent.succeeded":
+      case "payment_intent.canceled":
+      case "payment_intent.payment_failed": {
         const intentData = evt.data.object as Stripe.PaymentIntent;
         if (intentData.invoice) break;
-
         const userId = intentData.metadata.userId;
         const tutorId = intentData.metadata.articleId;
         await updatePurchase({ userId, tutorId, intentData });
