@@ -3,6 +3,7 @@ import { getLevelFromMetadata } from "@/feature/stripe/stripe";
 import { stripe } from "@/lib/stripe";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { upsertSubscription } from "@/feature/stripe/stripe";
 import Stripe from "stripe";
 
 export async function POST(req: Request) {
@@ -14,7 +15,10 @@ export async function POST(req: Request) {
     if(!sig) throw new Error("Signatureがありません");
     evt = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET as string);
   } catch(err) {
-    throw err;
+    const setErr = err instanceof Error ? err : new Error("Bad Request");
+    return new NextResponse(`Webhook Error: ${setErr.message}`, {
+      status: 400,
+    });
   };
 
   try {
@@ -41,7 +45,7 @@ export async function POST(req: Request) {
         } else if("payment_intent" in session && session.payment_intent) {
           const intentData = await stripe.paymentIntents.retrieve(session.payment_intent as string);
           const userId = intentData.metadata.userId;
-          const tutorId = intentData.metadata.articleId;
+          const tutorId = intentData.metadata.tutorId;
           await createPurchase({ userId, tutorId, intentData });
         };
         break;
@@ -49,31 +53,12 @@ export async function POST(req: Request) {
       case "invoice.payment_succeeded": {
         const invoice: Stripe.Invoice = evt.data.object;
         const userId = invoice.subscription_details?.metadata?.userId;
-        if(!userId) throw new NextResponse("ユーザーIDがありません", { status: 400 });
+        if (!userId) return new NextResponse("ユーザーIDがありません", { status: 400 });
 
         const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
         const planLevel = getLevelFromMetadata(subscription.items.data[0].price.metadata);
 
-        await prisma?.subscription.upsert({
-          where: { userId },
-          update: {
-            subscriptionId: subscription.id,
-            priceId: subscription.items.data[0].price.id,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            status: subscription.status,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            planLevel: planLevel,
-          },
-          create: {
-            userId: userId,
-            subscriptionId: subscription.id,
-            priceId: subscription.items.data[0].price.id,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            status: subscription.status,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            planLevel: planLevel,
-          },
-        });
+        await upsertSubscription({ userId, subscription, level: planLevel });
         break;
       };
       case "invoice.payment_failed": {
@@ -82,45 +67,29 @@ export async function POST(req: Request) {
       };
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
-        const subscription: Stripe.Subscription = await evt.data.object;
+        const subscription: Stripe.Subscription = evt.data.object;
         const userId = subscription.metadata.userId;
-        if(!userId) throw new NextResponse("ユーザーIDがありません", { status: 400 });
+        if (!userId) return new NextResponse("ユーザーIDが存在しません", { status: 400 });
         const planLevel = getLevelFromMetadata(subscription.items.data[0].price.metadata);
-
-        await prisma?.subscription.upsert({
-          where: { userId },
-          update: {
-            subscriptionId: subscription.id,
-            priceId: subscription.items.data[0].price.id,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            status: subscription.status,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            planLevel: planLevel,
-          },
-          create: {
-            userId: userId,
-            subscriptionId: subscription.id,
-            priceId: subscription.items.data[0].price.id,
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            status: subscription.status,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end,
-            planLevel: planLevel,
-          },
-        });
+        await upsertSubscription({ userId, subscription, level: planLevel });
         break;
       };
       case "payment_intent.succeeded":
       case "payment_intent.canceled":
       case "payment_intent.payment_failed": {
-        const intentData = evt.data.object as Stripe.PaymentIntent;
+        const intentData = evt.data.object;
         if (intentData.invoice) break;
         const userId = intentData.metadata.userId;
-        const tutorId = intentData.metadata.articleId;
+        const tutorId = intentData.metadata.tutorId;
         await updatePurchase({ userId, tutorId, intentData });
         break;
       };
     };
-  } catch(err) {
-    throw err;
-  };
+    return new NextResponse("OK", { status: 200 });
+  } catch (err) {
+    console.error(err);
+    return new NextResponse("fail event handle", {
+      status: 400,
+    });
+  }
 };

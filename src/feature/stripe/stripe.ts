@@ -189,3 +189,35 @@ export const getShippingByCustomerId = async({ customerId }: { customerId: strin
     throw err;
   };
 };
+
+export const upsertSubscription = async ({ userId, subscription, level }: { userId: string; subscription: Stripe.Subscription; level: SubscriptionLevelType }) => {
+  try {
+    const upsertSubscription = await prisma?.subscription.upsert({
+      where: { userId },
+      update: {
+        subscriptionId: subscription.id,
+        priceId: subscription.items.data[0].price.id,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        status: subscription.status,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        planLevel: level,
+        amount: subscription.items.data[0].price.unit_amount ?? undefined,
+        period: subscription.items.data[0].price.recurring?.interval ?? undefined,
+      },
+      create: {
+        userId: userId,
+        subscriptionId: subscription.id,
+        priceId: subscription.items.data[0].price.id,
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        status: subscription.status,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        planLevel: level,
+        amount: subscription.items.data[0].price.unit_amount ?? undefined,
+        period: subscription.items.data[0].price.recurring?.interval ?? undefined,
+      },
+    });
+    return upsertSubscription;
+  } catch(err) {
+    throw err;
+  };
+};
