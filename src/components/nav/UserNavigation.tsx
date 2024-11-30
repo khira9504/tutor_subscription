@@ -36,11 +36,6 @@ export default async function UserNavigation({ user }: UserNavigationProps) {
               購入履歴
             </DropdownMenuItem>
           </Link>
-          <Link className="block mb-[.5em]" href="/shipping">
-            <DropdownMenuItem className="cursor-pointer">
-              住所表示
-            </DropdownMenuItem>
-          </Link>
           <Link className="block mb-[.5em]" href="/billing">
             <DropdownMenuItem className="cursor-pointer">
               プラン・請求

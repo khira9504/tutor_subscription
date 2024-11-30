@@ -4,7 +4,6 @@ import { getAuthSession } from "@/lib/nextauth";
 import { redirect } from "next/navigation";
 import { ReactNode } from "react";
 
-
 export default async function page() {
   const session = await getAuthSession();
   if(!session) redirect("/login");
@@ -12,7 +11,7 @@ export default async function page() {
   const userId = session.user.id;
   const purchasesInfo = await getPurchaseInfo({ userId });
   if(purchasesInfo.length == 0) return <p>購入履歴はありませんでした</p>;
-
+  
   return (
     <main className="max-w-screen-md mx-auto">
       <div className="space-y-4">
