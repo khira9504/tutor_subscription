@@ -18,7 +18,7 @@ export default async function TutorList() {
   return (
     <div className="space-y-6">
       {tutors.map((tutor, i) => (
-        <div key={`tutor${i}`}>
+        <div key={`tutor${i.toString()}`}>
         <div className="bg-white">
           <Link href={`/tutors/${tutor.id}`} className="border-2 rounded p-4 flex space-x-4 cursor-pointer hover:scale-[1.01] transition duration-300 shadow-md hover:shadow-lg">
             <div className="relative w-40 h-40 border-2 flex-shrink-0 z-0">
