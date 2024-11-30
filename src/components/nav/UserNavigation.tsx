@@ -1,20 +1,15 @@
-"use client";
 import { type User } from "next-auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { Avatar } from "../ui/avatar";
 import Image from "next/image";
-import { signOut } from "next-auth/react";
 import Link from "next/link";
+import UserNavigationButton from "./UserNavigationButton";
 
 type UserNavigationProps = {
   user: Pick<User, "name" | "image" | "email">
 }
 
 export default async function UserNavigation({ user }: UserNavigationProps) {
-  const handleClick = async() => {
-    await signOut({ callbackUrl: "/" });
-  };
-
   return (
     <div className="flex items-center space-x-4">
       <DropdownMenu>
@@ -42,7 +37,7 @@ export default async function UserNavigation({ user }: UserNavigationProps) {
             </DropdownMenuItem>
           </Link>
           <DropdownMenuItem className="cursor-pointer">
-            <button className="w-full text-left" onClick={async () => handleClick()}>ログアウト</button>
+            <UserNavigationButton />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

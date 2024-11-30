@@ -41,7 +41,7 @@ export async function Billing({ session }: BillingProps) {
           <BillingPortalLink customerId={userInfo.customerId} />
         </Suspense>
         <Button asChild size={"sm"} variant={"link"}>
-          <Link href="/refund-policy">返金ポリシー</Link>
+          <Link href="/policy">返金ポリシー</Link>
         </Button>
       </CardFooter>
     </Card>
